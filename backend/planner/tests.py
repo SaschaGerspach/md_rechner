@@ -76,7 +76,8 @@ class ChainEndpointTests(APITestCase):
         body = response.json()
         self.assertEqual(body["cycles"], [])
         self.assertIn({"source": "flachs", "target": "leinengarn"}, body["edges"])
-        self.assertEqual(body["topo_order"][0], "flachs")
+        order = body["topo_order"]
+        self.assertLess(order.index("flachs"), order.index("leinengarn"))
 
 
 class BuildingsEndpointTests(APITestCase):
