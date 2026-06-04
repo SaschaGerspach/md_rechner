@@ -1,32 +1,72 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import ChainView from './ChainView'
-import { postBalance } from './api'
-import type { BalanceResponse, Settlement } from './types'
-
-const RECIPES = ['leinengarn', 'leinengewebe', 'einfaches_leinenhemd']
+import { getBuildings, postBalance } from './api'
+import type { BalanceResponse, BuildingInput, CatalogBuilding, Settlement } from './types'
 
 function App() {
+  const [catalog, setCatalog] = useState<CatalogBuilding[] | null>(null)
   const [population, setPopulation] = useState(10)
-  const [workers, setWorkers] = useState(2)
-  const [allocation, setAllocation] = useState<Record<string, number>>({
-    leinengarn: 50,
-    leinengewebe: 30,
-    einfaches_leinenhemd: 20,
-  })
+  const [buildings, setBuildings] = useState<BuildingInput[]>([])
   const [result, setResult] = useState<BalanceResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const allocTotal = Object.values(allocation).reduce((a, b) => a + b, 0)
+  useEffect(() => {
+    getBuildings()
+      .then((data) => {
+        setCatalog(data.buildings)
+        if (data.buildings.length > 0) {
+          setBuildings([newRow(data.buildings[0])])
+        }
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+  }, [])
+
+  function newRow(building: CatalogBuilding): BuildingInput {
+    return { type: building.id, level: building.levels[0].level, workers: 1, allocation: {} }
+  }
+
+  function findBuilding(id: string): CatalogBuilding | undefined {
+    return catalog?.find((b) => b.id === id)
+  }
+
+  function updateRow(index: number, patch: Partial<BuildingInput>) {
+    setBuildings((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)))
+  }
+
+  function changeType(index: number, id: string) {
+    const building = findBuilding(id)
+    if (!building) return
+    // level set and recipes differ per building, so reset both
+    updateRow(index, { type: id, level: building.levels[0].level, allocation: {} })
+  }
+
+  function changeLevel(index: number, level: number) {
+    // recipes may differ between levels, so the allocation is reset
+    updateRow(index, { level, allocation: {} })
+  }
+
+  function setAlloc(index: number, output: string, percent: number) {
+    setBuildings((rows) =>
+      rows.map((row, i) =>
+        i === index ? { ...row, allocation: { ...row.allocation, [output]: percent } } : row,
+      ),
+    )
+  }
+
+  function addBuilding() {
+    if (catalog && catalog.length > 0) setBuildings((rows) => [...rows, newRow(catalog[0])])
+  }
+
+  function removeBuilding(index: number) {
+    setBuildings((rows) => rows.filter((_, i) => i !== index))
+  }
 
   async function compute() {
     setLoading(true)
     setError(null)
-    const settlement: Settlement = {
-      population,
-      buildings: [{ type: 'sewing_hut', level: 3, workers, allocation }],
-    }
+    const settlement: Settlement = { population, buildings }
     try {
       setResult(await postBalance(settlement))
     } catch (e) {
@@ -37,10 +77,13 @@ function App() {
     }
   }
 
+  if (error && !catalog) return <p className="error">{error}</p>
+  if (!catalog) return <p className="note">Loading building catalog…</p>
+
   return (
     <main>
       <h1>Production Planner</h1>
-      <p className="note">Base values (level 3), demand balance — no rationing.</p>
+      <p className="note">Base values, demand balance — no rationing.</p>
 
       <section className="inputs">
         <label>
@@ -53,34 +96,69 @@ function App() {
           />
         </label>
 
-        <fieldset>
-          <legend>Sewing hut (level 3)</legend>
-          <label>
-            Workers
-            <input
-              type="number"
-              min={0}
-              value={workers}
-              onChange={(e) => setWorkers(Number(e.target.value))}
-            />
-          </label>
-          {RECIPES.map((recipe) => (
-            <label key={recipe}>
-              {recipe} %
-              <input
-                type="number"
-                min={0}
-                value={allocation[recipe]}
-                onChange={(e) =>
-                  setAllocation({ ...allocation, [recipe]: Number(e.target.value) })
-                }
-              />
-            </label>
-          ))}
-          <p className={allocTotal > 100 ? 'warn' : ''}>allocation total: {allocTotal}%</p>
-        </fieldset>
+        {buildings.map((row, index) => {
+          const building = findBuilding(row.type)
+          const level = building?.levels.find((l) => l.level === row.level)
+          const allocTotal = Object.values(row.allocation).reduce((a, b) => a + b, 0)
+          return (
+            <fieldset key={index}>
+              <legend>Building {index + 1}</legend>
+              <label>
+                Type
+                <select value={row.type} onChange={(e) => changeType(index, e.target.value)}>
+                  {catalog.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Level
+                <select
+                  value={row.level}
+                  onChange={(e) => changeLevel(index, Number(e.target.value))}
+                >
+                  {building?.levels.map((l) => (
+                    <option key={l.level} value={l.level}>
+                      {l.level}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Workers{level ? ` (max ${level.max_workers})` : ''}
+                <input
+                  type="number"
+                  min={0}
+                  value={row.workers}
+                  onChange={(e) => updateRow(index, { workers: Number(e.target.value) })}
+                />
+              </label>
+              {level?.can_produce.map((recipe) => (
+                <label key={recipe.output}>
+                  {recipe.output} %
+                  <input
+                    type="number"
+                    min={0}
+                    value={row.allocation[recipe.output] ?? 0}
+                    onChange={(e) => setAlloc(index, recipe.output, Number(e.target.value))}
+                  />
+                </label>
+              ))}
+              <p className={allocTotal > 100 ? 'warn' : ''}>allocation total: {allocTotal}%</p>
+              <button type="button" onClick={() => removeBuilding(index)}>
+                Remove building
+              </button>
+            </fieldset>
+          )
+        })}
 
-        <button onClick={compute} disabled={loading}>
+        <button type="button" onClick={addBuilding}>
+          Add building
+        </button>
+
+        <button onClick={compute} disabled={loading || buildings.length === 0}>
           {loading ? 'Computing…' : 'Compute balance'}
         </button>
       </section>

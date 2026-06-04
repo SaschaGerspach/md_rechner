@@ -17,6 +17,27 @@ export interface BalanceResponse {
   balance: Record<string, number>
 }
 
+export interface Recipe {
+  output: string
+  rate_at_100: number
+  inputs: Record<string, number>
+}
+
+export interface BuildingLevel {
+  level: number
+  max_workers: number
+  can_produce: Recipe[]
+}
+
+export interface CatalogBuilding {
+  id: string
+  levels: BuildingLevel[]
+}
+
+export interface BuildingsResponse {
+  buildings: CatalogBuilding[]
+}
+
 export interface ChainEdge {
   source: string
   target: string
