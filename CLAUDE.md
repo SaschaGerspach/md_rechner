@@ -54,8 +54,12 @@ Platzhalter dienen nur dazu, das Modell zu prüfen; sie werden nicht ausgeliefer
 - **Backend** (aus `backend/`, venv unter `.venv/Scripts/`):
   - Tests: `./.venv/Scripts/python.exe manage.py test`
   - System-Check: `./.venv/Scripts/python.exe manage.py check`
-- **Frontend:** noch kein Setup — nichts auszuführen.
-- Noch **kein Lint, keine CI.** Eintragen, sobald real vorhanden.
+- **Frontend** (aus `frontend/`, Vite + React + TS, **Node ≥ 20.19 / 22.12+**
+  nötig — Vite 8 ist rolldown-basiert):
+  - Build (inkl. TS-Check): `npm run build`
+  - Lint: `npm run lint`
+  - Dev-Server: `npm run dev` (Port 5173, in Backend-CORS erlaubt)
+- Noch **keine CI.** Eintragen, sobald real vorhanden.
 - **Keine Befehle erfinden.** Existiert ein Script oder Target nicht, nicht danach
   raten — fehlt es, ansprechen statt halluzinieren.
 

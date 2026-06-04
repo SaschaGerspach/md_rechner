@@ -1,0 +1,58 @@
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.note {
+  color: #6b6375;
+  font-size: 14px;
+}
+
+.inputs label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0;
+}
+
+fieldset {
+  margin: 16px 0;
+}
+
+button {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.warn,
+.error,
+.validation {
+  color: #c0392b;
+}
+
+.error {
+  white-space: pre-wrap;
+}
+
+.results table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.results th,
+.results td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.deficit td:last-child {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.surplus td:last-child {
+  color: #1e8449;
+}
