@@ -51,10 +51,11 @@ Platzhalter dienen nur dazu, das Modell zu prüfen; sie werden nicht ausgeliefer
 
 ## Validierung
 
-- **Es gibt noch keine Tests, keine CI, kein Lint-Setup** — das Projekt ist
-  Pre-Code. Daher hier (noch) nichts auszuführen.
-- Sobald das Gerüst steht: dieser Abschnitt spiegelt die **tatsächlichen** Befehle
-  (Test / Lint / Build) — erst eintragen, wenn sie real existieren.
+- **Backend** (aus `backend/`, venv unter `.venv/Scripts/`):
+  - Tests: `./.venv/Scripts/python.exe manage.py test`
+  - System-Check: `./.venv/Scripts/python.exe manage.py check`
+- **Frontend:** noch kein Setup — nichts auszuführen.
+- Noch **kein Lint, keine CI.** Eintragen, sobald real vorhanden.
 - **Keine Befehle erfinden.** Existiert ein Script oder Target nicht, nicht danach
   raten — fehlt es, ansprechen statt halluzinieren.
 

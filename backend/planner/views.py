@@ -1,0 +1,24 @@
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from . import calc
+from .data import STATIC
+from .serializers import SettlementSerializer
+
+
+@api_view(["POST"])
+def balance(request):
+    serializer = SettlementSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    settlement = serializer.validated_data
+
+    errors = calc.validate(settlement, STATIC)
+    production, demand, bal = calc.compute_balance(settlement, STATIC)
+    return Response(
+        {
+            "errors": errors,
+            "production": production,
+            "demand": demand,
+            "balance": bal,
+        }
+    )
