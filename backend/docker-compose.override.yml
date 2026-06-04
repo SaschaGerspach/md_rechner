@@ -1,0 +1,11 @@
+# Dev override, loaded automatically by `docker compose up` (not when the base
+# file is selected explicitly with -f). Swaps the prod gunicorn default for
+# runserver with auto-reload. The entrypoint still runs migrate first.
+services:
+  backend:
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    volumes:
+      # bind-mount the source so runserver's reloader sees code edits live
+      - .:/app
+      # keep the SQLite named volume mounted in dev too (same as prod)
+      - sqlite_data:/data

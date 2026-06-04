@@ -13,5 +13,8 @@ COPY . .
 
 EXPOSE 8000
 
-# migrate creates the schema in the mounted SQLite volume on first start.
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# entrypoint runs migrate, then execs the command below (or the dev override).
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+
+# Production default: gunicorn serving the project's WSGI app.
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
