@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from . import calc
+from . import calc, graph
 from .data import STATIC
 
 # sewing_hut L3 (2 workers), split 50/30/20 across the linen chain.
@@ -45,6 +45,38 @@ class ComputeBalanceTests(APITestCase):
         errors = calc.validate(bad, STATIC)
         self.assertEqual(len(errors), 1)
         self.assertIn("workers", errors[0])
+
+
+class RecipeGraphTests(APITestCase):
+    def test_shipped_static_data_is_acyclic(self):
+        # curation guard: a recipe must never depend on itself
+        g = graph.build_recipe_graph(STATIC)
+        self.assertEqual(graph.find_cycles(g), [])
+
+    def test_topo_order_respects_chain(self):
+        g = graph.build_recipe_graph(STATIC)
+        order = graph.topo_order(g)
+        self.assertLess(order.index("flachs"), order.index("leinengarn"))
+        self.assertLess(order.index("leinengarn"), order.index("leinengewebe"))
+        self.assertLess(order.index("leinengewebe"), order.index("einfaches_leinenhemd"))
+
+    def test_cycle_detection_flags_bad_data(self):
+        bad = {"buildings": {"x": {"levels": {1: {"max_workers": 1, "can_produce": [
+            {"output": "a", "rate_at_100": 1, "inputs": {"b": 1}},
+            {"output": "b", "rate_at_100": 1, "inputs": {"a": 1}},
+        ]}}}}}
+        g = graph.build_recipe_graph(bad)
+        self.assertTrue(graph.find_cycles(g))
+
+
+class ChainEndpointTests(APITestCase):
+    def test_get_returns_acyclic_chain(self):
+        response = self.client.get(reverse("chain"))
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["cycles"], [])
+        self.assertIn({"source": "flachs", "target": "leinengarn"}, body["edges"])
+        self.assertEqual(body["topo_order"][0], "flachs")
 
 
 class BalanceEndpointTests(APITestCase):
