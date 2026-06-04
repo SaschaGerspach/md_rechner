@@ -56,3 +56,13 @@ button {
 .surplus td:last-child {
   color: #1e8449;
 }
+
+.sankey {
+  background: #fff;
+  border: 1px solid #ccc;
+  max-width: 100%;
+}
+
+.sankey text {
+  fill: #222;
+}

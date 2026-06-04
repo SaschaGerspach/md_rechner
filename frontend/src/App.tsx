@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import ChainView from './ChainView'
 import { postBalance } from './api'
 import type { BalanceResponse, Settlement } from './types'
 
@@ -119,6 +120,11 @@ function App() {
           </table>
         </section>
       )}
+
+      <section className="chain">
+        <h2>Production chain</h2>
+        <ChainView />
+      </section>
     </main>
   )
 }

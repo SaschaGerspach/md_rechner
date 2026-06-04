@@ -16,3 +16,15 @@ export interface BalanceResponse {
   demand: Record<string, number>
   balance: Record<string, number>
 }
+
+export interface ChainEdge {
+  source: string
+  target: string
+}
+
+export interface ChainResponse {
+  nodes: string[]
+  edges: ChainEdge[]
+  cycles: string[][]
+  topo_order: string[]
+}
