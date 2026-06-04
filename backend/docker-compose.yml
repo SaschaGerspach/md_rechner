@@ -1,0 +1,19 @@
+# Backend-only stack for local development with dev-prod parity.
+# V1 uses SQLite (see notes/ARCHITECTURE.md + decisions log): no database
+# service is provisioned. In Phase 4, when accounts/persistence arrive, a
+# `db` service (postgres, own named volume, referenced via depends_on and the
+# backend's DB env) is added here additively — the backend service does not
+# need restructuring for that.
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # keep the SQLite file on the named volume, not in the container layer
+      SQLITE_PATH: /data/db.sqlite3
+    volumes:
+      - sqlite_data:/data
+
+volumes:
+  sqlite_data:
