@@ -28,6 +28,15 @@ class ComputeBalanceTests(APITestCase):
         self.assertAlmostEqual(bal["einfaches_leinenhemd"], 2)
         # flachs has no producer in V1: leaf deficit equal to the chain's draw
         self.assertAlmostEqual(bal["flachs"], -100)
+        # 10 residents, 1/day each, nothing produces these -> -10
+        self.assertAlmostEqual(bal["essen"], -10)
+        self.assertAlmostEqual(bal["wasser"], -10)
+
+    def test_resident_demand_scales_with_population(self):
+        small = {**SETTLEMENT, "population": 3}
+        _, dem, _ = calc.compute_balance(small, STATIC)
+        self.assertAlmostEqual(dem["essen"], 3)
+        self.assertAlmostEqual(dem["wasser"], 3)
 
     def test_validate_flags_too_many_workers(self):
         bad = {"population": 0, "buildings": [

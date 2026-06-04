@@ -10,7 +10,7 @@ class BuildingSerializer(serializers.Serializer):
     allocation = serializers.DictField(child=serializers.FloatField(min_value=0))
 
     def validate(self, attrs):
-        building = STATIC.get(attrs["type"])
+        building = STATIC["buildings"].get(attrs["type"])
         if building is None:
             raise serializers.ValidationError(f"unknown building type: {attrs['type']}")
         level = building["levels"].get(attrs["level"])

@@ -9,7 +9,7 @@ the semantics; the seed for this module is spike/calc_dryrun.py.
 def validate(settlement, static):
     errors = []
     for b in settlement["buildings"]:
-        level = static[b["type"]]["levels"][b["level"]]
+        level = static["buildings"][b["type"]]["levels"][b["level"]]
         # a building cannot hold more workers than its level allows
         if b["workers"] > level["max_workers"]:
             errors.append(
@@ -28,7 +28,7 @@ def compute_balance(settlement, static):
     demand = {}      # resource -> units/day consumed (recipe inputs only here)
 
     for b in settlement["buildings"]:
-        level = static[b["type"]]["levels"][b["level"]]
+        level = static["buildings"][b["type"]]["levels"][b["level"]]
         recipes = {r["output"]: r for r in level["can_produce"]}
         for output, percent in b["allocation"].items():
             recipe = recipes[output]
@@ -37,6 +37,10 @@ def compute_balance(settlement, static):
             production[output] = production.get(output, 0) + made
             for res, qty_per_unit in recipe["inputs"].items():
                 demand[res] = demand.get(res, 0) + qty_per_unit * made
+
+    # resident consumption folds into the same demand pool, no priority
+    for res, per_capita in static["resident_consumption"].items():
+        demand[res] = demand.get(res, 0) + per_capita * settlement["population"]
 
     resources = set(production) | set(demand)
     balance = {r: production.get(r, 0) - demand.get(r, 0) for r in resources}

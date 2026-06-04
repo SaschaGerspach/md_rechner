@@ -1,10 +1,13 @@
 """Static game data: PLACEHOLDER VALUES, not curated.
 
-One building only for the first slice. Shape matches notes/ARCHITECTURE.md
-(building -> levels -> level -> can_produce). Real rates will be read off the
-in-game assignment screen at skill 3 when curation starts; these numbers only
-exercise the model. `flachs` has no producer here on purpose: V1 does not model
-fields, so it surfaces as a leaf deficit equal to the chain's daily draw.
+Two kinds of static data live here, both the same for every player (see
+notes/OVERVIEW.md principle 6): production per building, and consumption per
+resident. One building only for the first slice. Shape matches
+notes/ARCHITECTURE.md (building -> levels -> level -> can_produce). Real rates
+will be read off the in-game assignment screen at skill 3 when curation starts;
+these numbers only exercise the model. `flachs` has no producer here on purpose:
+V1 does not model fields, so it surfaces as a leaf deficit equal to the chain's
+daily draw.
 """
 
 _SEWING_RECIPES = [
@@ -14,11 +17,20 @@ _SEWING_RECIPES = [
 ]
 
 STATIC = {
-    "sewing_hut": {
-        "levels": {
-            1: {"max_workers": 1, "can_produce": _SEWING_RECIPES},
-            2: {"max_workers": 1, "can_produce": _SEWING_RECIPES},
-            3: {"max_workers": 2, "can_produce": _SEWING_RECIPES},
+    "buildings": {
+        "sewing_hut": {
+            "levels": {
+                1: {"max_workers": 1, "can_produce": _SEWING_RECIPES},
+                2: {"max_workers": 1, "can_produce": _SEWING_RECIPES},
+                3: {"max_workers": 2, "can_produce": _SEWING_RECIPES},
+            },
         },
+    },
+    # Per-resident daily consumption. Residents draw from the same resource pool
+    # as recipe inputs, with no priority, so the calc just adds these into the
+    # same demand total (see ARCHITECTURE calc rules).
+    "resident_consumption": {
+        "essen": 1,
+        "wasser": 1,
     },
 }
