@@ -23,6 +23,14 @@ The deterministic calculator core. Manual input, anonymous, base values only.
 per resource, whether you have a surplus or a shortfall, and see the production
 chain laid out.
 
+**Status (core done):** Backend (Django/DRF) serves `POST /api/balance/`,
+`GET /api/buildings/` and `GET /api/chain/`; calc and networkx chain graph live in
+`planner/`, with tests. Frontend (React/Vite) renders the planner form (dynamic
+building list from the catalog), the balance table, and the chain as a D3 Sankey.
+Backend is containerized (gunicorn prod / runserver dev), SQLite on a named volume.
+Open: game data is still placeholder recipes on the real building set (real recipe
+curation pending), styling pass, and settlement-weighted Sankey edges.
+
 ---
 
 ## Phase 2 — Save Upload (Analyzer)

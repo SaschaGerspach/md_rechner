@@ -17,16 +17,28 @@ bei Bedarf.")
 
 ## Aktueller Stand
 
-- **Konzeptphase abgeschlossen.** Vision, Architektur, Datenmodell und Rechen-
-  Semantik sind durchdacht und in `notes/` dokumentiert.
-- Das Modell ist gegen Testdaten als **rechnerisch korrekt nachgewiesen**
-  (Demand-Balance, geteilter Pool ohne Priorität, Zyklen-Erkennung). Lauffähiger
-  Beleg: `spike/calc_dryrun.py` — die vier Funktionen dort sind die Keimzelle des
-  echten Calc-Moduls.
-- **Noch kein Produktionscode.** Nächster Schritt: Django/DRF-Gerüst + Calc als
-  sauberes Python-Modul, getestet gegen eine Platzhalter-Fixture. Klein anfangen:
-  ein Gebäude, ein Endpoint, ein grüner Test. Nicht gleich alle Gebäude, nicht
-  gleich das Frontend.
+**Phase 1 (MVP Planner) im Kern umgesetzt.** Monorepo mit `backend/` + `frontend/`.
+
+- **Backend (Django + DRF, `backend/`):** Calc als pures Python-Modul
+  (`planner/calc.py`: `validate` + `compute_balance`, Demand-Balance inkl.
+  Bewohner-Verbrauch). Chain-Graph via networkx (`planner/graph.py`: Topo-Sort +
+  Zyklen-Erkennung). Statik-Schicht in `planner/data.py` (Gebäude + Bewohner-
+  Verbrauch). Endpoints: `POST /api/balance/`, `GET /api/buildings/`,
+  `GET /api/chain/`. 10 grüne Tests.
+- **Frontend (React + TS + Vite, `frontend/`):** Planner-Formular (Population +
+  dynamische Gebäudeliste aus `/api/buildings/`), Balance-Tabelle, Produktions-
+  kette als D3-Sankey (`ChainView.tsx`). CORS im Backend für den Dev-Origin.
+- **Container:** Backend containerisiert mit Dev/Prod-Parität (Gunicorn als
+  Prod-Default, runserver-Override für Dev mit Auto-Reload), SQLite im named
+  volume. Siehe `backend/Dockerfile` + `docker-compose*.yml`.
+- **Spieldaten:** 8 echte MD-Gebäude im Katalog, **Rezepte/Raten aber noch
+  Platzhalter** (Baukosten sind kein Modell-Bestandteil). Echte Kuratierung der
+  Rezepte ist die offene Datenquellen-Entscheidung.
+- **Beleg/Keimzelle:** `spike/calc_dryrun.py` (Demand-Balance, geteilter Pool
+  ohne Priorität, Zyklen-Erkennung) — diente als Vorlage für das Calc-Modul.
+
+Offene nächste Schritte: echte Rezepte kuratieren, Styling-Durchgang, settlement-
+gewichtete Sankey (Kantenbreite = Einheiten/Tag).
 
 ## Stack
 
