@@ -25,6 +25,27 @@ def balance(request):
 
 
 @api_view(["GET"])
+def buildings(request):
+    # serve the static building catalog so the frontend can build its forms;
+    # levels are int-keyed internally, exposed as a sorted list with explicit level
+    catalog = [
+        {
+            "id": building_id,
+            "levels": [
+                {
+                    "level": level_no,
+                    "max_workers": level["max_workers"],
+                    "can_produce": level["can_produce"],
+                }
+                for level_no, level in sorted(building["levels"].items())
+            ],
+        }
+        for building_id, building in STATIC["buildings"].items()
+    ]
+    return Response({"buildings": catalog})
+
+
+@api_view(["GET"])
 def chain(request):
     g = graph.build_recipe_graph(STATIC)
     cycles = graph.find_cycles(g)

@@ -79,6 +79,20 @@ class ChainEndpointTests(APITestCase):
         self.assertEqual(body["topo_order"][0], "flachs")
 
 
+class BuildingsEndpointTests(APITestCase):
+    def test_get_returns_catalog(self):
+        response = self.client.get(reverse("buildings"))
+        self.assertEqual(response.status_code, 200)
+        catalog = {b["id"]: b for b in response.json()["buildings"]}
+        self.assertIn("sewing_hut", catalog)
+        levels = {lvl["level"]: lvl for lvl in catalog["sewing_hut"]["levels"]}
+        self.assertEqual(levels[3]["max_workers"], 2)
+        outputs = {r["output"] for r in levels[3]["can_produce"]}
+        self.assertEqual(
+            outputs, {"leinengarn", "leinengewebe", "einfaches_leinenhemd"}
+        )
+
+
 class BalanceEndpointTests(APITestCase):
     def test_post_returns_balance(self):
         response = self.client.post(reverse("balance"), SETTLEMENT, format="json")
