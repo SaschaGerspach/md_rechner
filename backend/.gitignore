@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 db.sqlite3
+
+# Curated game data kept local for now, not in the public repo (see decisions log).
+planner/game_data.json
