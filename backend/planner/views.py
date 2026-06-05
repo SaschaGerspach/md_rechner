@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from . import calc, graph
-from .data import STATIC
+from .data import SOURCE, STATIC, VERIFIED
 from .serializers import SettlementSerializer
 
 
@@ -20,6 +20,9 @@ def balance(request):
             "production": production,
             "demand": demand,
             "balance": bal,
+            # recipes whose rate is not yet measured contribute nothing; list
+            # them so the UI can flag the gap instead of showing a silent zero
+            "rates_missing": calc.missing_rates(settlement, STATIC),
         }
     )
 
@@ -42,7 +45,8 @@ def buildings(request):
         }
         for building_id, building in STATIC["buildings"].items()
     ]
-    return Response({"buildings": catalog})
+    # surface provenance so the UI can mark the data as unverified placeholder
+    return Response({"buildings": catalog, "source": SOURCE, "verified": VERIFIED})
 
 
 @api_view(["GET"])
