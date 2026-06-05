@@ -6,6 +6,8 @@ import type { BalanceResponse, BuildingInput, CatalogBuilding, Settlement } from
 
 function App() {
   const [catalog, setCatalog] = useState<CatalogBuilding[] | null>(null)
+  const [source, setSource] = useState('')
+  const [verified, setVerified] = useState(true)
   const [population, setPopulation] = useState(10)
   const [buildings, setBuildings] = useState<BuildingInput[]>([])
   const [result, setResult] = useState<BalanceResponse | null>(null)
@@ -16,6 +18,8 @@ function App() {
     getBuildings()
       .then((data) => {
         setCatalog(data.buildings)
+        setSource(data.source)
+        setVerified(data.verified)
         if (data.buildings.length > 0) {
           setBuildings([newRow(data.buildings[0])])
         }
@@ -84,6 +88,12 @@ function App() {
     <main>
       <h1>Production Planner</h1>
       <p className="note">Base values, demand balance — no rationing.</p>
+      {!verified && (
+        <p className="warn">
+          Placeholder data ({source}) — unverified, and recipe rates are not yet
+          measured, so the balance can't be computed yet.
+        </p>
+      )}
 
       <section className="inputs">
         <label>
@@ -127,7 +137,7 @@ function App() {
                 </select>
               </label>
               <label>
-                Workers{level ? ` (max ${level.max_workers})` : ''}
+                Workers{level && level.max_workers != null ? ` (max ${level.max_workers})` : ''}
                 <input
                   type="number"
                   min={0}
@@ -173,6 +183,13 @@ function App() {
                 <li key={i}>{e}</li>
               ))}
             </ul>
+          )}
+          {result.rates_missing.length > 0 && (
+            <p className="warn">
+              Rate not measured yet for:{' '}
+              {result.rates_missing.map((m) => `${m.building}/${m.output}`).join(', ')} —
+              these produce 0 until a rate is entered.
+            </p>
           )}
           <table>
             <thead>
