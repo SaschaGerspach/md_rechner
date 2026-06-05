@@ -156,7 +156,8 @@ order — is what diagnoses a real settlement ("you actually produce 3 clothes/d
 This is the heavier flow-propagation use of networkx and belongs with the save
 analyzer, not the V1 planner. The data model above is built so this is an
 *extension* of the same graph, not a rebuild: the edges and quantity constraints
-are already in place.
+are already in place — and byproducts must then scale off the capped output, not
+the nominal one (in V1, with no capping, the two coincide).
 
 **Fields and raw materials in V1.** Fields are **not** modeled as producers. A
 field harvests once per cycle (bulk, at season start) while the chain draws stored
