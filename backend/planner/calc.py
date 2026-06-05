@@ -48,6 +48,11 @@ def compute_balance(settlement, static):
             production[output] = production.get(output, 0) + made
             for res, qty_per_unit in recipe["inputs"].items():
                 demand[res] = demand.get(res, 0) + qty_per_unit * made
+            # byproducts are extra production, scaled per main-output unit made.
+            # NOTE: when Phase 2 adds min-over-inputs capping, byproducts must
+            # scale off the *capped* output, not the nominal `made` used here.
+            for res, ratio in recipe.get("byproducts", {}).items():
+                production[res] = production.get(res, 0) + ratio * made
 
     # resident consumption folds into the same demand pool, no priority
     for res, per_capita in static["resident_consumption"].items():

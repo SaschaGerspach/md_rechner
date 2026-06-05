@@ -18,6 +18,13 @@ def build_recipe_graph(static):
                 g.add_node(recipe["output"])
                 for inp in recipe["inputs"]:
                     g.add_edge(inp, recipe["output"])
+                # byproducts derive from the same inputs as the main output, so
+                # they hang off the recipe's inputs too (keeps balance and graph
+                # in sync); cycle detection still runs over the whole graph
+                for byproduct in recipe.get("byproducts", {}):
+                    g.add_node(byproduct)
+                    for inp in recipe["inputs"]:
+                        g.add_edge(inp, byproduct)
     return g
 
 

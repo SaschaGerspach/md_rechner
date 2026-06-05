@@ -96,6 +96,41 @@ class ExampleFallbackTests(APITestCase):
         self.assertIn("sewing_hut", static["buildings"])
 
 
+# Numeric fixture for the byproduct effect (the shipped data has null rates).
+BYPRODUCT_STATIC = {
+    "buildings": {
+        "thresher": {
+            "levels": {
+                1: {"max_workers": 1, "can_produce": [
+                    {"output": "grain", "output_per_day_at_100": 10,
+                     "inputs": {"crop": 2}, "byproducts": {"straw": 3}},
+                ]},
+            },
+        },
+    },
+    "resident_consumption": {},
+}
+
+
+class ByproductTests(APITestCase):
+    def test_byproduct_adds_to_production_in_balance(self):
+        s = {"population": 0, "buildings": [
+            {"type": "thresher", "level": 1, "workers": 1, "allocation": {"grain": 100}}
+        ]}
+        prod, dem, bal = calc.compute_balance(s, BYPRODUCT_STATIC)
+        # 10 grain/day made -> straw = ratio 3 * 10 = 30 on the production side
+        self.assertAlmostEqual(prod["grain"], 10)
+        self.assertAlmostEqual(prod["straw"], 30)
+        self.assertAlmostEqual(dem["crop"], 20)
+        self.assertAlmostEqual(bal["straw"], 30)
+
+    def test_byproduct_is_a_graph_node_and_edge(self):
+        g = graph.build_recipe_graph(BYPRODUCT_STATIC)
+        self.assertIn("straw", g.nodes)
+        self.assertIn(("crop", "straw"), g.edges)
+        self.assertEqual(graph.find_cycles(g), [])
+
+
 class RecipeGraphTests(APITestCase):
     def test_shipped_static_data_is_acyclic(self):
         # curation guard: a recipe must never depend on itself
