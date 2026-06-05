@@ -32,13 +32,14 @@ bei Bedarf.")
   Prod-Default, runserver-Override für Dev mit Auto-Reload), SQLite im named
   volume. Siehe `backend/Dockerfile` + `docker-compose*.yml`.
 - **Spieldaten:** 8 echte MD-Gebäude im Katalog, **Rezepte/Raten aber noch
-  Platzhalter** (Baukosten sind kein Modell-Bestandteil). Echte Kuratierung der
-  Rezepte ist die offene Datenquellen-Entscheidung.
+  Platzhalter** (Baukosten sind kein Modell-Bestandteil). Datenquelle inzwischen
+  geklärt (MD-Manager-Extrakt, siehe „Spieldaten-Quelle"); offen ist die
+  Kuratierung der echten Daten ins Schema.
 - **Beleg/Keimzelle:** `spike/calc_dryrun.py` (Demand-Balance, geteilter Pool
   ohne Priorität, Zyklen-Erkennung) — diente als Vorlage für das Calc-Modul.
 
-Offene nächste Schritte: echte Rezepte kuratieren, Styling-Durchgang, settlement-
-gewichtete Sankey (Kantenbreite = Einheiten/Tag).
+Offene nächste Schritte: echte Rezepte aus dem Extrakt ins Schema kuratieren,
+Styling-Durchgang, settlement-gewichtete Sankey (Kantenbreite = Einheiten/Tag).
 
 ## Stack
 
@@ -57,9 +58,32 @@ gewichtete Sankey (Kantenbreite = Einheiten/Tag).
   hand-kuratiert.
 - **Persönlicher Zustand** (Gebäude, Arbeiter, Population, Allokation): pro Spieler.
 
-Form siehe `notes/ARCHITECTURE.md`. Alle Zahlenwerte sind aktuell **Platzhalter** —
-die echte Quelle für den Auslieferungs-Datensatz ist noch offen (Decisions-Log).
-Platzhalter dienen nur dazu, das Modell zu prüfen; sie werden nicht ausgeliefert.
+Form siehe `notes/ARCHITECTURE.md`. Der aktuelle Katalog nutzt **Platzhalter**-
+Rezepte/Raten, nur zum Modell-Prüfen — nicht ausliefern. Die Quelle für den echten
+Datensatz ist inzwischen geklärt (siehe „Spieldaten-Quelle").
+
+## Spieldaten-Quelle (Kuratierung)
+
+Kuratierungs-Quelle für die statische Schicht: `notes/md_manager_extract.json` —
+**Rohmaterial, NICHT der auslieferbare Datensatz.** Per Pfad referenziert, nicht
+`@`-importiert (≈200 KB; nur lesen, wenn an den Daten gearbeitet wird).
+
+Extrahiert aus MD Manager v1.3 (Xarmo / r00t @ Toplitz Discord, Nexus mod 25);
+Lizenz erlaubt Nachnutzung **mit Quellenangabe** — Attribution erhalten.
+
+Verlässlich enthalten (≈378 Prozesse, 22 Gebäude): Gebäude, Rezept-Inputs,
+Nebenprodukte (`byproducts`), Werkzeug-Verschleiß, Wirtschaftsdaten; plus
+Item-Liste mit Food/Water/Wood-Verbrauchswerten (Bewohner-Bedarf). **NICHT**
+enthalten:
+- **Tagesraten** (`output_per_day_at_100`) — im Spiel bei Skill 3 messen.
+- **Gebäudestufen / max_workers** — separat kuratieren (z. B. Nähhütte 1/1/2).
+- **Projekt-IDs** — Quelle nutzt Anzeigenamen („Sewinghut", „Flax Stalk"), auf
+  snake_case-IDs mappen.
+
+Werte zielen auf die MD-Manager-v1.3-Spielversion — vor dem Ausliefern gegen das
+aktuelle Spiel prüfen. Das echte Fixture aus dieser Quelle kuratieren (Schema in
+`notes/ARCHITECTURE.md`); diese Werte nie unverifiziert ausliefern. Feld-Prozesse
+(`production_day_flag: 1`) sind in V1 keine Produzenten — beim Mappen weglassen.
 
 ## Validierung
 

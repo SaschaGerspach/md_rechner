@@ -54,8 +54,8 @@ Two risks to plan for:
 ## Data model
 
 Two strictly separated layers (see OVERVIEW principle 6). The shapes below are
-the canonical structure; real numeric values are curated by hand from the wiki
-and are not invented here.
+the canonical structure; real numeric values are curated by hand from the source
+in "Game data strategy" and are not invented here.
 
 ### Static game data (same for every player)
 
@@ -201,15 +201,20 @@ recipes and several levels (see Data model) — but the total remains small enou
 to curate by hand. The effort is paid once, and a checked data file is far more
 reliable than a scraper that breaks when the wiki HTML changes.
 
-**Source, split by reliability.** The graph (which input makes which output) and
-the input quantities are stable and read reliably from the wiki. The **production
-rates** are not: players report the wiki's rates lag the current game version.
-For the shipping dataset the intended source for rates is the **in-game assignment
-screen** — assign a skill-3 worker, set one recipe to 100%, read the per-day
-output; that value is exactly `output_per_day_at_100`. This split (inputs from the
-wiki, rates measured in-game) is the leaning decision, to be confirmed when real
-curation starts. Until then, any placeholder values are fine — they only exercise
-the model, they are not shipped.
+**Source, split by reliability (RESOLVED).** The graph (which input makes which
+output), input quantities, byproducts, building assignment, tool-wear, item prices
+and resident consumption values come from `notes/md_manager_extract.json` —
+extracted from MD Manager v1.3 (Xarmo / r00t @ Toplitz Discord, Nexus mod 25;
+license permits reuse **with credit** — keep attribution). The **production rates**
+are NOT in that source (and the wiki's rates lag the game): the rate
+(`output_per_day_at_100`) is measured on the **in-game assignment screen** — assign
+a skill-3 worker, set one recipe to 100%, read the per-day output. Building
+**levels / max_workers** are also not in the extract; curate them separately (e.g.
+from the wiki). The extract is a *curation source*, not the shippable fixture: it
+uses display names (map to snake_case IDs), targets MD Manager v1.3's game version
+(verify against the current game before shipping), and field processes are excluded
+in V1. (Datamining the encrypted `.pak` was investigated and rejected — see
+`spike/datamine_spike.md`.)
 
 ## Hosting
 
