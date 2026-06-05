@@ -1,0 +1,29 @@
+{
+  "_source": "Example schema data — invented, NOT from any game and NOT MD Manager. This file is public and documents the structure of the local game_data.json (which is gitignored).",
+  "verified": false,
+  "buildings": {
+    "example_workshop": {
+      "levels": {
+        "1": {"max_workers": null, "can_produce": [
+          {"output": "widget", "output_per_day_at_100": null, "inputs": {"raw_material": 2}}
+        ]},
+        "2": {"max_workers": null, "can_produce": [
+          {"output": "widget", "output_per_day_at_100": null, "inputs": {"raw_material": 2}},
+          {"output": "gadget", "output_per_day_at_100": null, "inputs": {"widget": 1}, "byproducts": {"scrap": 1}}
+        ]}
+      }
+    },
+    "example_well": {
+      "levels": {
+        "1": {"max_workers": null, "can_produce": [
+          {"output": "example_water", "output_per_day_at_100": null, "inputs": {}}
+        ]}
+      }
+    }
+  },
+  "resident_consumption": {
+    "_todo": "Per-resident daily demand placeholder; see game_data.json for the real curation notes.",
+    "food": 1,
+    "water": 1
+  }
+}

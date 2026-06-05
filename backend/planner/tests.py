@@ -1,8 +1,10 @@
+from pathlib import Path
+
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from . import calc, graph
-from .data import STATIC
+from .data import _EXAMPLE_PATH, _build_static, _read_raw, STATIC
 
 # Inline fixture with numeric rates: the math tests must not depend on the
 # shipped data, whose rates are intentionally null until measured in-game.
@@ -77,6 +79,21 @@ class ComputeBalanceTests(APITestCase):
             {"type": "synth_hut", "level": 1, "workers": 9, "allocation": {"thread": 100}}
         ]}
         self.assertEqual(calc.validate(s, SYNTH), [])
+
+
+class ExampleFallbackTests(APITestCase):
+    def test_falls_back_to_example_when_game_data_missing(self):
+        raw = _read_raw(Path("/no/such/game_data.json"), _EXAMPLE_PATH)
+        static = _build_static(raw)
+        # dummy schema data from the example file, not the real catalog
+        self.assertIn("example_workshop", static["buildings"])
+        self.assertNotIn("sewing_hut", static["buildings"])
+
+    def test_uses_real_data_when_present(self):
+        # with the real file present, _read_raw must not use the example
+        raw = _read_raw()
+        static = _build_static(raw)
+        self.assertIn("sewing_hut", static["buildings"])
 
 
 class RecipeGraphTests(APITestCase):
